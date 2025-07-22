@@ -5,8 +5,12 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.ViewModelProvider
+import com.example.android_lab1.data.WeatherItem
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var vm: WeatherViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -16,5 +20,8 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        vm = ViewModelProvider(this)[WeatherViewModel::class.java]
+
     }
 }

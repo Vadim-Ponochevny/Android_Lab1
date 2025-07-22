@@ -1,11 +1,21 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-parcelize")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
+
 
 android {
     namespace = "com.example.android_lab1"
     compileSdk = 35
+
+    val file = rootProject.file("local.properties")
+    val properties = Properties()
+    properties.load(FileInputStream(file))
 
     defaultConfig {
         applicationId = "com.example.android_lab1"
@@ -15,6 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "apiKeySafe", properties.getProperty("apiKey"))
     }
 
     buildTypes {
@@ -33,10 +45,19 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 dependencies {
-
+    implementation(libs.androidx.room.compiler)
+    val lifecycle_version = "2.9.1"
+    implementation(libs.retrofit2.retrofit)
+    implementation(libs.retrofit2.converter.gson)
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
