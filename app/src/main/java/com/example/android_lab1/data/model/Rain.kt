@@ -1,4 +1,4 @@
-package com.example.android_lab1.data
+package com.example.android_lab1.data.model
 
 import android.os.Parcelable
 import com.google.gson.annotations.SerializedName

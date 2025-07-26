@@ -1,7 +1,6 @@
-package com.example.android_lab1.retrofit
+package com.example.android_lab1.data.remote
 
-import com.example.android_lab1.data.ForecastResponse
-import retrofit2.Call
+import com.example.android_lab1.data.model.ForecastResponse
 import retrofit2.http.*
 
 interface RetrofitServicesForForecast {

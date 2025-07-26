@@ -1,15 +1,20 @@
 package com.example.android_lab1
 
 import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
-import com.example.android_lab1.data.WeatherItem
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var vm: WeatherViewModel
+    private var adapter = Adapter()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,8 +25,30 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        val recyclerView = findViewById<RecyclerView>(R.id.rView)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
+        recyclerView.adapter = adapter
 
         vm = ViewModelProvider(this)[WeatherViewModel::class.java]
+
+        val textViewOfCity = findViewById<TextView>(R.id.fieldForCity)
+        val sendButton = findViewById<Button>(R.id.button)
+
+        vm.weatherData.observe(this, { weather ->
+            adapter.submitList(weather.list)
+
+        })
+
+        sendButton.setOnClickListener {
+            val cityName = findViewById<EditText>(R.id.edit_text)
+            val receivedCity = cityName.text.toString()
+            textViewOfCity.text = receivedCity
+
+            vm.fetchWeather(receivedCity)
+        }
+
 
     }
 }

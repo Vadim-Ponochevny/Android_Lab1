@@ -52,10 +52,11 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.room.compiler)
+//    implementation(libs.androidx.room.compiler)
     val lifecycle_version = "2.9.1"
     implementation(libs.retrofit2.retrofit)
     implementation(libs.retrofit2.converter.gson)
+    implementation(libs.bumptech.glide)
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     implementation(libs.androidx.core.ktx)
