@@ -5,8 +5,8 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.android_lab1.data.model.ForecastResponse
-import com.example.android_lab1.data.remote.RetrofitServicesForForecast
+import com.example.android_lab1.data.modelForDaily.WeatherResponse
+import com.example.android_lab1.data.remote.RetrofitServicesForDaily
 import kotlinx.coroutines.launch
 import com.example.android_lab1.data.remote.Common
 
@@ -14,14 +14,14 @@ const val apiKey = BuildConfig.apiKeySafe
 
 class WeatherViewModel : ViewModel() {
 
-    val weatherData = MutableLiveData<ForecastResponse>()
+    val weatherData = MutableLiveData<WeatherResponse>()
 
-    var mService: RetrofitServicesForForecast = Common.retrofitService
+    var mService: RetrofitServicesForDaily = Common.retrofitService
 
     fun fetchWeather(city: String) {
         viewModelScope.launch {
             try {
-                val response = mService.getForecast(city, apiKey, "metric")
+                val response = mService.getForecast(city, 16, apiKey, "metric")
                 if (response != null) {
                     Log.d("Response from Weather API", "$response")
                     weatherData.value = response
@@ -37,6 +37,7 @@ class WeatherViewModel : ViewModel() {
             }
         }
     }
+
 
 
     override fun onCleared() {

@@ -1,6 +1,7 @@
 package com.example.android_lab1
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -11,6 +12,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.w3c.dom.Text
+import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Calendar
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private lateinit var vm: WeatherViewModel
@@ -48,6 +57,12 @@ class MainActivity : AppCompatActivity() {
 
             vm.fetchWeather(receivedCity)
         }
+
+        val calendar = Calendar.getInstance()
+        val dayOfWeek = SimpleDateFormat("EEEE", Locale("ru")).format(calendar.time)
+
+        val data = findViewById<TextView>(R.id.fieldForData)
+        data.text = dayOfWeek
 
 
     }

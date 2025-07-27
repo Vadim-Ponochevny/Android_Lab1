@@ -3,6 +3,6 @@ package com.example.android_lab1.data.remote
 
 object Common {
     private val BASE_URL = "https://api.openweathermap.org/data/2.5/"
-    val retrofitService: RetrofitServicesForForecast
-        get() = RetrofitClient.getClient(BASE_URL).create(RetrofitServicesForForecast::class.java)
+    val retrofitService: RetrofitServicesForDaily
+        get() = RetrofitClient.getClient(BASE_URL).create(RetrofitServicesForDaily::class.java)
 }
