@@ -1,23 +1,18 @@
 package com.example.android_lab1
 
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.android_lab1.data.modelForDaily.Forecast
 import java.text.SimpleDateFormat
-import java.util.*
 import java.util.Date
 import java.util.Locale
-
 
 class Adapter(
 ) : ListAdapter<Forecast, Adapter.ViewHolder>(WeatherDiffCallback()) {
@@ -35,28 +30,29 @@ class Adapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val forecastItem = getItem(position)
-        val iconUrl = "https://openweathermap.org/img/wn/${forecastItem.weather[0].icon}@2x.png"
-        val degrees = forecastItem.temp.day.toInt().toString() + "°"
-//        val dayOfWeek = SimpleDateFormat("EEEE", Locale("ru")).format(forecastItem.dt.toInt())
-        val timestampInSeconds = forecastItem.dt.toLong()
-        val timestampInMillis = timestampInSeconds * 1000  // обязательно!
+        val item = getItem(position)
 
-        val date = Date(timestampInMillis)
+        // 1. Temp
+        val temperature = "${item.temp.day.toInt()}°"
+        holder.temp.text = temperature
 
-        val formatter = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale("ru"))
-        val formattedDate = formatter.format(date)
-
-        val dayFormat = SimpleDateFormat("EEEE", Locale("ru"))
-        val dayOfWeek = dayFormat.format(date)
-        holder.temp.text = degrees
+        // 2. Day Of Week
+        val date = Date(item.dt * 1000)
+        val dayOfWeek = SimpleDateFormat("EEEE", Locale("ru")).format(date)
         holder.day.text = dayOfWeek
-        Glide.with(holder.itemView.context)
-            .load(iconUrl)
-            .into(holder.icon)
+
+        // 3. icon
+        val iconCode = item.weather.firstOrNull()?.icon
+        if (iconCode != null) {
+            val iconUrl = "https://openweathermap.org/img/wn/${iconCode}@2x.png"
+            Glide.with(holder.itemView.context)
+                .load(iconUrl)
+                .into(holder.icon)
+        } else {
+            holder.icon.setImageResource(R.drawable.ic_launcher_foreground)
+        }
     }
 }
-
 
 class WeatherDiffCallback : DiffUtil.ItemCallback<Forecast>() {
     override fun areItemsTheSame(oldItem: Forecast, newItem: Forecast): Boolean {
