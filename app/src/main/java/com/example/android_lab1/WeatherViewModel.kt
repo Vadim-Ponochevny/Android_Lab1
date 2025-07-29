@@ -21,11 +21,12 @@ class WeatherViewModel : ViewModel() {
 
     var mService: RetrofitServices = Common.retrofitService
 
-    fun fetchWeather(city: String) {
+    fun fetchWeather(city: String, unitParam: String) {
         viewModelScope.launch {
             try {
-                val dailyForecastResponse = mService.getDailyForecast(city, 16, apiKey, "metric")
-                val currentWeatherResponse = mService.getCurrentWeather(city, apiKey, "metric")
+                val dailyForecastResponse = mService.getDailyForecast(city, 16, apiKey, unitParam)
+                val currentWeatherResponse = mService.getCurrentWeather(city, apiKey, unitParam)
+
                 if ((dailyForecastResponse != null) and (currentWeatherResponse != null)) {
                     Log.d("1Response from Weather API", "$dailyForecastResponse")
                     Log.d("2Response from Weather API", "$currentWeatherResponse")

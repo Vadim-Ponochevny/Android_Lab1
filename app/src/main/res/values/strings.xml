@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Android_Lab1</string>
+    <string-array name="degrees">
+        <item>C</item>
+        <item>F</item>
+    </string-array>
 </resources>

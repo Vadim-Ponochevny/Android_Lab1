@@ -5,9 +5,12 @@ import android.content.Context
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -24,7 +27,7 @@ import java.util.Calendar
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var vm: WeatherViewModel
+    private lateinit var viewModel: WeatherViewModel
     private var adapter = Adapter()
 
     private lateinit var recyclerView: RecyclerView
@@ -36,6 +39,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sendButton: Button
     private lateinit var InputcityName: EditText
     private lateinit var group: Group
+    private lateinit var spinner: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         pressure = findViewById<TextView>(R.id.fieldForPressure)
         group = findViewById<Group>(R.id.contentGroup)
         recyclerView = findViewById<RecyclerView>(R.id.rView)
-
+        spinner = findViewById<Spinner>(R.id.spinner)
 
         setupSystemBarsPadding()
         setUpRecyclerView()
@@ -59,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         observersForLifeData()
         setUpListeners()
         displayCurrentDay()
+        spinner()
         group.visibility = View.GONE
     }
 
@@ -78,15 +83,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewModel() {
-        vm = ViewModelProvider(this)[WeatherViewModel::class.java]
+        viewModel = ViewModelProvider(this)[WeatherViewModel::class.java]
     }
 
     private fun observersForLifeData() {
-        vm.dailyWeatherData.observe(this, { weatherResponse ->
+        viewModel.dailyWeatherData.observe(this, { weatherResponse ->
             adapter.submitList(weatherResponse.list)
         })
 
-        vm.currentWeatherData.observe(this) { weather ->
+        viewModel.currentWeatherData.observe(this) { weather ->
             val iconCode = weather.weather.firstOrNull()?.icon
             textViewOfCity.text = weather.name
             iconCode?.let {
@@ -101,7 +106,7 @@ class MainActivity : AppCompatActivity() {
             group.visibility = View.VISIBLE
         }
 
-        vm.errorLiveData.observe(this) {error ->
+        viewModel.errorLiveData.observe(this) { error ->
             Toast.makeText(this, error, Toast.LENGTH_LONG).show()
         }
     }
@@ -109,8 +114,15 @@ class MainActivity : AppCompatActivity() {
     private fun setUpListeners() {
         sendButton.setOnClickListener {
             val receivedCity = InputcityName.text.toString()
+            val selectedDegree = spinner.selectedItem.toString()
+
             if (receivedCity != null) {
-                vm.fetchWeather(receivedCity)
+                val unitParam = when (selectedDegree) {
+                    "C" -> "metric"
+                    "F" -> "imperial"
+                    else -> "metric"
+                }
+                viewModel.fetchWeather(receivedCity, unitParam)
             }
             hideKeyboard()
         }
@@ -120,6 +132,28 @@ class MainActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val dayOfWeek = SimpleDateFormat("EEEE", Locale("ru")).format(calendar.time)
         data.text = dayOfWeek
+    }
+
+    private fun spinner() {
+        val degrees = resources.getStringArray(R.array.degrees)
+
+        if (spinner != null) {
+            val adapter = ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_item, degrees
+            )
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinner.adapter = adapter
+
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                    val selectedDegree = parent.getItemAtPosition(position).toString()
+                }
+
+                override fun onNothingSelected(parent: AdapterView<*>) {
+                }
+            }
+        }
     }
 
 }
