@@ -4,4 +4,10 @@
         <item>C</item>
         <item>F</item>
     </string-array>
+    <string name="pressure_text">Атм. давление: %1$s</string>
+    <string name="temp_text">%1$s°</string>
+    <string name="input">Введите город</string>
+    <string name="check">Показать погоду</string>
+    <string name="title">Прогноз погоды на 16 дней</string>
+    <string name="content_description">Изображение погоды</string>
 </resources>

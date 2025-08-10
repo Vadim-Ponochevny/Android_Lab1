@@ -1,61 +1,42 @@
 package com.example.android_lab1
 
-import android.app.Activity
-import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Spinner
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.Group
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.android_lab1.databinding.ActivityMainBinding
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+object Constants {
+    const val CELSIUS = "C"
+    const val FAHRENHEIT = "F"
+    const val UNIT_METRIC = "metric"
+    const val UNIT_IMPERIAL = "imperial"
+}
 
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: WeatherViewModel
     private var adapter = Adapter()
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var textViewOfCity: TextView
-    private lateinit var icon: ImageView
-    private lateinit var temp: TextView
-    private lateinit var pressure: TextView
-    private lateinit var data: TextView
-    private lateinit var sendButton: Button
-    private lateinit var InputcityName: EditText
-    private lateinit var group: Group
-    private lateinit var spinner: Spinner
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
-        InputcityName = findViewById<EditText>(R.id.edit_text)
-        sendButton = findViewById<Button>(R.id.button)
-        textViewOfCity = findViewById<TextView>(R.id.fieldForCity)
-        data = findViewById<TextView>(R.id.fieldForCurrentDayOfWeek)
-        icon = findViewById<ImageView>(R.id.iconOfTemp)
-        temp = findViewById<TextView>(R.id.fieldForTemp)
-        pressure = findViewById<TextView>(R.id.fieldForPressure)
-        group = findViewById<Group>(R.id.contentGroup)
-        recyclerView = findViewById<RecyclerView>(R.id.rView)
-        spinner = findViewById<Spinner>(R.id.spinner)
+        enableEdgeToEdge()
 
         setupSystemBarsPadding()
         setUpRecyclerView()
@@ -64,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         setUpListeners()
         displayCurrentDay()
         spinner()
-        group.visibility = View.GONE
+        binding.contentGroup.visibility = View.GONE
     }
 
     private fun setupSystemBarsPadding() {
@@ -77,9 +58,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpRecyclerView() {
-        recyclerView.setHasFixedSize(true)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = adapter
+        binding.rView.setHasFixedSize(true)
+        binding.rView.layoutManager = LinearLayoutManager(this)
+        binding.rView.adapter = adapter
     }
 
     private fun initViewModel() {
@@ -87,23 +68,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observersForLifeData() {
-        viewModel.dailyWeatherData.observe(this, { weatherResponse ->
+        viewModel.dailyWeatherData.observe(this) { weatherResponse ->
             adapter.submitList(weatherResponse.list)
-        })
+        }
 
         viewModel.currentWeatherData.observe(this) { weather ->
-            val iconCode = weather.weather.firstOrNull()?.icon
-            textViewOfCity.text = weather.name
-            iconCode?.let {
+            binding.fieldForCity.text = weather.name
+            weather.weather.firstOrNull()?.icon?.let {
                 Glide.with(this)
                     .load("https://openweathermap.org/img/wn/${it}@2x.png")
-                    .into(icon)
+                    .into(binding.iconOfTemp)
             }
-            val currentTemp = weather.main.temp.toInt().toString() + "°"
-            temp.text = currentTemp
-            val currentPressure = "Атм. давление: " + weather.main.pressure.toString()
-            pressure.text = currentPressure
-            group.visibility = View.VISIBLE
+            binding.fieldForTemp.text = getString(R.string.temp_text, weather.main.temp.toInt().toString())
+            binding.fieldForPressure.text = getString(R.string.pressure_text, weather.main.pressure.toString())
+            binding.contentGroup.visibility = View.VISIBLE
         }
 
         viewModel.errorLiveData.observe(this) { error ->
@@ -112,15 +90,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUpListeners() {
-        sendButton.setOnClickListener {
-            val receivedCity = InputcityName.text.toString()
-            val selectedDegree = spinner.selectedItem.toString()
+        binding.button.setOnClickListener {
+            val receivedCity = binding.editText.text.toString()
+            val selectedDegree = binding.spinner.selectedItem.toString()
 
-            if (receivedCity != null) {
+            if (receivedCity.isNotEmpty()) {
                 val unitParam = when (selectedDegree) {
-                    "C" -> "metric"
-                    "F" -> "imperial"
-                    else -> "metric"
+                    Constants.CELSIUS -> Constants.UNIT_METRIC
+                    Constants.FAHRENHEIT -> Constants.UNIT_IMPERIAL
+                    else -> Constants.UNIT_METRIC
                 }
                 viewModel.fetchWeather(receivedCity, unitParam)
             }
@@ -131,38 +109,28 @@ class MainActivity : AppCompatActivity() {
     private fun displayCurrentDay() {
         val calendar = Calendar.getInstance()
         val dayOfWeek = SimpleDateFormat("EEEE", Locale("ru")).format(calendar.time)
-        data.text = dayOfWeek
+        binding.fieldForCurrentDayOfWeek.text = dayOfWeek
     }
 
     private fun spinner() {
         val degrees = resources.getStringArray(R.array.degrees)
 
-        if (spinner != null) {
-            val adapter = ArrayAdapter(
-                this,
-                android.R.layout.simple_spinner_item, degrees
-            )
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            spinner.adapter = adapter
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item, degrees
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinner.adapter = adapter
 
-            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                    val selectedDegree = parent.getItemAtPosition(position).toString()
-                }
+        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val selectedDegree = parent.getItemAtPosition(position).toString()
+            }
 
-                override fun onNothingSelected(parent: AdapterView<*>) {
-                }
+            override fun onNothingSelected(parent: AdapterView<*>) {
             }
         }
     }
 
 }
 
-fun Activity.hideKeyboard() {
-    hideKeyboard(currentFocus ?: View(this))
-}
-
-fun Context.hideKeyboard(view: View) {
-    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
-}
